@@ -1,5 +1,4 @@
 from guizero import App, Drawing
-from datetime import datetime
 import time
 
 w=1280
@@ -87,21 +86,6 @@ def write(word,c):
 def write_sentence(words,c):
         for word in words:
                 write(word,c)
-
-def write_time():
-    now = datetime.now()
-    hour = now.hour()
-    minute = now.minute()
-    if(hour>12):
-        print("pm")
-    else:
-        print("am")
-    print("it is")
-
-    if(minute < 35):
-        print("past")
-    else:
-        print("to")
 
 write_sentence(["it","is","twenty","five1","past","three"],"white")
 write("am","yellow")
