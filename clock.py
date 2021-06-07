@@ -1,11 +1,17 @@
 from guizero import App, Drawing
 import time
+from datetime import datetime
+from collections import namedtuple
+
+Pos = namedtuple("Pos", "x y")
 
 w=1280
 h=1024
 let=[0,0]
 txt_wborder=220
 txt_hborder=90
+circ_inner = 10
+circ_outer = circ_inner+32
 letter_w = (w-2*txt_wborder)/11
 letter_h = (h-2*txt_hborder)/10
 app = App(bg="black")
@@ -13,27 +19,48 @@ app.set_full_screen()
 drawing = Drawing(app, width=w,height=h)
 drawing.bg="black"
 
-drawing.rectangle(txt_wborder,txt_hborder,w-txt_wborder,h-txt_hborder, color="black")
+corner1 = Pos(txt_wborder,txt_hborder-25)
+corner2 = Pos(w-txt_wborder,txt_hborder-25)
+corner3 = Pos(w-txt_wborder,h-txt_hborder-25)
+corner4 = Pos(txt_wborder,h-txt_hborder-25)
+
 def set_logo(c):
-     drawing.rectangle(w/2-40,h-70,w/2+40,h, color=c)
-def set_minute(m,c):
+     drawing.rectangle(w/2-40,h-90,w/2+40,h, color=c)
+def set_circle(i,c):
+        if i == 0:
+             pass
+        elif i == 1:
+                drawing.oval(corner1.x-circ_inner,corner1.y-circ_inner,corner1.x-circ_outer,corner1.y-circ_outer,color=c)  
+        elif i == 2:
+                drawing.oval(corner2.x+circ_inner,corner2.y-circ_inner,corner2.x+circ_outer,corner2.y-circ_outer,color=c)  
+        elif i == 3:
+                drawing.oval(corner3.x+circ_inner,corner3.y+circ_inner,corner3.x+circ_outer,corner3.y+circ_outer,color=c)  
+        elif i == 4:
+                drawing.oval(corner4.x-circ_inner,corner4.y+circ_inner,corner4.x-circ_outer,corner4.y+circ_outer,color=c)
+def set_minutes(m,c):
         if m == 0:
-                pass
+             pass
         elif m == 1:
-                pass
+             set_circle(1,c)
         elif m == 2:
-                pass
+             set_circle(1,c)
+             set_circle(2,c)
         elif m == 3:
-                pass
+             set_circle(1,c)
+             set_circle(2,c)
+             set_circle(3,c)
         elif m == 4:
-                pass
+             set_circle(1,c)
+             set_circle(2,c)
+             set_circle(3,c)
+             set_circle(4,c)
 def set_letter(x,y,c):
 	drawing.rectangle(txt_wborder+letter_w*x,txt_hborder-25+letter_h*y,txt_wborder+letter_w*(x+1),txt_hborder-25+letter_h*(y+1),color=c)
 def set_letters(letters,c):
         for l in letters:
                 set_letter(l[0],l[1],c)
 def set_all_letters(c):
-        drawing.rectangle(txt_wborder+letter_w,txt_hborder+letter_h,txt_wborder+letter_w*10,txt_hborder+letter_h*9,color=c)
+        drawing.rectangle(txt_wborder,txt_hborder-25,txt_wborder+letter_w*11,txt_hborder+letter_h*10-25,color=c)
 def write(word,c):
                 if word == "it":
                         set_letters([[0,0],[1,0]],c)
@@ -87,7 +114,103 @@ def write_sentence(words,c):
         for word in words:
                 write(word,c)
 
-write_sentence(["it","is","twenty","five1","past","three"],"white")
-write("am","yellow")
-set_logo("green")
+def write_time(c):
+    now = datetime.now()
+    hour = now.hour
+    minute = now.minute
+    
+    #For testing
+    #hour = 15
+    #minute = 16
+
+
+    # It is
+    write("it",c)
+    write("is",c)
+
+    # five, ten, quarter, twenty, twentyfive, half
+    minute_block = minute // 5
+    if minute_block == 0:
+        pass
+    elif minute_block == 1 or minute_block == 11:
+        write("five1",c)
+    elif minute_block == 2 or minute_block == 10:
+        write("ten1",c)
+    elif minute_block == 3 or minute_block == 9:
+        write("quarter",c)
+    elif minute_block == 4 or minute_block == 8:
+        write("twenty",c)
+    elif minute_block == 5 or minute_block == 7:
+        write_sentence(["twenty","five1"],c)
+    elif minute_block == 6:
+        write("half",c)
+
+    # Past, to or whole hour
+    if(minute >= 35 ):
+        write("to",c)
+        hour+=1
+    elif(minute >= 5):
+        write("past",c)
+        
+
+    # one, two, three, ...
+    if (hour == 1) or (hour == 13):
+        write("one",c)
+    elif (hour == 2) or (hour == 14):
+        write("two",c)
+    elif (hour == 3) or (hour == 15):
+        write("three",c)
+    elif (hour == 4) or (hour == 16):
+        write("four",c)
+    elif (hour == 5) or (hour == 17):
+        write("five",c)
+    elif (hour == 6) or (hour == 18):
+        write("six",c)
+    elif (hour == 7) or (hour == 19):
+        write("seven",c)
+    elif (hour == 8) or (hour == 20):
+        write("eight",c)
+    elif (hour == 9) or (hour == 21):
+        write("nine",c)
+    elif (hour == 10) or (hour == 22):
+        write("ten",c)
+    elif (hour == 11) or (hour == 23):
+        write("eleven",c)
+    elif (hour == 12) or (hour == 24):
+        write("twelwe",c)
+
+    # Extra minutes
+    surplus_minutes = minute % 5
+    if surplus_minutes == 1:
+        set_minutes(1,c)
+    elif surplus_minutes == 2:
+        set_minutes(2,c)
+    elif surplus_minutes == 3:
+        set_minutes(3,c)
+    elif surplus_minutes == 4:
+        set_minutes(4,c)
+
+def write_am_pm(c_am,c_pm):
+    now = datetime.now()
+    hour = now.hour
+    minute = now.minute
+    
+    #For testing
+    #hour = 15
+    #minute = 16
+
+    # AM or PM
+    if(hour>12):
+        write("pm",c_pm)
+    else:
+        write("am",c_am)
+
+def update_clock():
+     drawing.clear()
+     write_time("white")
+     write_am_pm("#909090","#707070")
+     set_logo("yellow")
+
+
+drawing.repeat(7,update_clock)
 app.display()
