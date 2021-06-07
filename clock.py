@@ -1,4 +1,4 @@
-from guizero import App, Drawing
+from guizero import App, Drawing, Picture
 import time
 from datetime import datetime
 from collections import namedtuple
@@ -18,6 +18,7 @@ app = App(bg="black")
 app.set_full_screen()
 drawing = Drawing(app, width=w,height=h)
 drawing.bg="black"
+picture = Picture(app, image="media/colorgif1.gif")
 
 corner1 = Pos(txt_wborder,txt_hborder-25)
 corner2 = Pos(w-txt_wborder,txt_hborder-25)
@@ -212,5 +213,5 @@ def update_clock():
      set_logo("yellow")
 
 
-drawing.repeat(7,update_clock)
+#drawing.repeat(7,update_clock)
 app.display()
