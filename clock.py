@@ -1,4 +1,4 @@
-from guizero import App, Drawing, Picture
+from guizero import App, Drawing
 import time
 from datetime import datetime
 from collections import namedtuple
@@ -18,7 +18,7 @@ app = App(bg="black")
 app.set_full_screen()
 drawing = Drawing(app, width=w,height=h)
 drawing.bg="black"
-picture = Picture(app, image="media/colorgif1.gif")
+
 
 corner1 = Pos(txt_wborder,txt_hborder-25)
 corner2 = Pos(w-txt_wborder,txt_hborder-25)
@@ -27,6 +27,8 @@ corner4 = Pos(txt_wborder,h-txt_hborder-25)
 
 def set_logo(c):
      drawing.rectangle(w/2-40,h-90,w/2+40,h, color=c)
+def set_logo_img(img):
+     drawing.image(0,0,img)
 def set_circle(i,c):
         if i == 0:
              pass
@@ -182,14 +184,24 @@ def write_time(c):
 
     # Extra minutes
     surplus_minutes = minute % 5
-    if surplus_minutes == 1:
-        set_minutes(1,c)
-    elif surplus_minutes == 2:
-        set_minutes(2,c)
-    elif surplus_minutes == 3:
-        set_minutes(3,c)
-    elif surplus_minutes == 4:
-        set_minutes(4,c)
+    if minute < 35:
+         if surplus_minutes == 1:
+             set_minutes(1,c)
+         elif surplus_minutes == 2:
+             set_minutes(2,c)
+         elif surplus_minutes == 3:
+             set_minutes(3,c)
+         elif surplus_minutes == 4:
+             set_minutes(4,c)
+    else:
+         if surplus_minutes == 1:
+             set_minutes(4,c)
+         elif surplus_minutes == 2:
+             set_minutes(3,c)
+         elif surplus_minutes == 3:
+             set_minutes(2,c)
+         elif surplus_minutes == 4:
+             set_minutes(1,c)
 
 def write_am_pm(c_am,c_pm):
     now = datetime.now()
@@ -210,8 +222,12 @@ def update_clock():
      drawing.clear()
      write_time("white")
      write_am_pm("#909090","#707070")
-     set_logo("yellow")
+     set_logo("#34cfeb")
 
 
-#drawing.repeat(7,update_clock)
-app.display()
+drawing.repeat(7,update_clock)
+try:
+     app.display()
+except:
+     print("An error occured")
+     
