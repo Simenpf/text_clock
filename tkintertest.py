@@ -32,7 +32,13 @@ letter_h = (h-2*txt_hborder)/10
 minute_w = 60
 
 #img = ImageTk.PhotoImage(Image.open("media/test.png")) 
+img = Image.open("media/art.jpg")
+img = img.resize((w,h))
+img_tk = ImageTk.PhotoImage(img)
 
+
+
+cropped_tk_imgs = []
 letter_rects = []
 letter_imgs  = []
 minute_rects = []
@@ -42,14 +48,22 @@ minute_imgs  = []
 for x in range(11):
         new = []
         letter_rects.append(new)
-        letter_imgs.append(new)
+        new2 = []
+        letter_imgs.append(new2)
         for y in range(10):
                 x0 = txt_wborder+x*letter_w
                 y0 = txt_hborder+y*letter_h-txt_hoffset
                 x1 = x0 + letter_w
                 y1 = y0 + letter_h
                 letter_rects[x].append(canvas.create_rectangle(x0, y0, x1, y1, fill='black'))
-                #letter_imgs.append(canvas.create_image(x0,y0, anchor=NW, image=img))
+#img = Image.open("media/art.jpg")
+#img_cropped = img.crop([0, 0, letter_w, letter_h])
+#img_tk = ImageTk.PhotoImage(img_cropped)
+#canvas.itemconfig(letter_imgs[0][5], image=img_tk)
+#img2 = Image.open("media/colorgradient1.png")
+#img_cropped2 = img2.crop([0, 0, letter_w, letter_h])
+#img_tk2 = ImageTk.PhotoImage(img_cropped2)
+#canvas.itemconfig(letter_imgs[1][5], image=img_tk2)
 
 Pos = namedtuple("Pos", "x y")
 corner1 = Pos(txt_wborder,     txt_hborder -txt_hoffset)
@@ -97,13 +111,32 @@ def set_minutes(m,c):
 
 def set_letter(x,y,c):
         canvas.itemconfig(letter_rects[x][y], fill=c)
+def set_letter_img(x,y):
+        set_letter(x,y,"#ABABAB")
+        canvas.create_image(0,0, anchor=NW, image=img_tk)
+        for x in range(11):
+                for y in range(10):
+                        curr_color= canvas.itemcget(letter_rects[x][y], "fill")
+                        if curr_color != "#ABABAB":
+                                x0 = txt_wborder+x*letter_w
+                                y0 = txt_hborder+y*letter_h-txt_hoffset
+                                x1 = x0 + letter_w
+                                y1 = y0 + letter_h
+                                letter_rects[x].append(canvas.create_rectangle(x0, y0, x1, y1, fill=curr_color))
+                                
+
 def set_letters(letters,c):
         for l in letters:
                 set_letter(l[0],l[1],c)
+def set_letters_img(letters,c):
+        for l in letters:
+                set_letter_img(l[0],l[1],c)
 def set_all_letters(c):
         for x in range(11):
                 for y in range(10):
                         set_letter(x,y,c)
+def set_all_letters_img(c):
+        canvas.create_image(0,0, anchor=NW, image=img_tk) 
 def write(word,c):
                 if word == "it":
                         set_letters([[0,0],[1,0]],c)
@@ -257,9 +290,12 @@ def write_am_pm(c_am,c_pm):
         write("pm",c_pm)
     else:
         write("am",c_am)
-
-def update_clock():
+def clear_clock():
      set_all_letters("black")
+     set_minutes(4,"black")
+def update_clock():
+     canvas.create_image(0,0, anchor=NW, image=img_tk) 
+     clear_clock()
      write_time("white","red")
      write_am_pm("#909090","#707070")
      sec = datetime.now().second
@@ -268,11 +304,12 @@ def update_clock():
      else:
          set_logo("blue")
      root.after(1000, update_clock)
- 
 
+set_all_letters("black")
+set_letter(5,5,"blue")
+set_letter_img(0,1)
+#root.after(1000,update_clock)
 
-
-root.after(1000,update_clock)
 root.mainloop()
 
      
