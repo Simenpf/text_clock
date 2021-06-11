@@ -27,13 +27,15 @@ print(h)
 txt_wborder=220
 txt_hborder=90
 txt_hoffset=25
+txt_w = w-2*txt_wborder
+txt_h = h-2*txt_hborder
 letter_w = (w-2*txt_wborder)/11
 letter_h = (h-2*txt_hborder)/10
 minute_w = 60
 
 #img = ImageTk.PhotoImage(Image.open("media/test.png")) 
-img = Image.open("media/art.jpg")
-img = img.resize((w,h))
+img = Image.open("text_clock/media/art.jpg")
+img = img.resize((txt_w,txt_h))
 img_tk = ImageTk.PhotoImage(img)
 
 
@@ -113,7 +115,7 @@ def set_letter(x,y,c):
         canvas.itemconfig(letter_rects[x][y], fill=c)
 def set_letter_img(x,y,c):
         set_letter(x,y,"#ABABAB")
-        canvas.create_image(0,0, anchor=NW, image=img_tk)
+        canvas.create_image(corner1.x,corner1.y, anchor=NW, image=img_tk)
         for x in range(11):
                 for y in range(10):
                         curr_color= canvas.itemcget(letter_rects[x][y], "fill")
@@ -253,24 +255,15 @@ def write_time(c,c2,set_letter):
 
     # Extra minutes
     surplus_minutes = minute % 5
-    if minute < 35:
-         if surplus_minutes == 1:
-             set_minutes(1,c2)
-         elif surplus_minutes == 2:
-             set_minutes(2,c2)
-         elif surplus_minutes == 3:
-             set_minutes(3,c2)
-         elif surplus_minutes == 4:
-             set_minutes(4,c2)
-    else:
-         if surplus_minutes == 1:
-             set_minutes(4,c2)
-         elif surplus_minutes == 2:
-             set_minutes(3,c2)
-         elif surplus_minutes == 3:
-             set_minutes(2,c2)
-         elif surplus_minutes == 4:
-             set_minutes(1,c2)
+    if surplus_minutes == 1:
+            set_minutes(1,c2)
+    elif surplus_minutes == 2:
+            set_minutes(2,c2)
+    elif surplus_minutes == 3:
+            set_minutes(3,c2)
+    elif surplus_minutes == 4:
+            set_minutes(4,c2)
+
 
 def write_am_pm(c_am,c_pm,set_letter):
     now = datetime.now()
@@ -291,7 +284,7 @@ def clear_clock():
      set_minutes(4,"black")
 def update_clock():
      clear_clock()
-     write_time("white","red",set_letter_img)
+     write_time("white","white",set_letter_img)
      write_am_pm("#909090","#707070",set_letter)
      sec = datetime.now().second
      if sec%2:
