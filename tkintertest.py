@@ -8,12 +8,23 @@ from collections import namedtuple
 import zmq
 import os
 
+def get_image(img, type):
+        img = Image.open("text_clock/media/"+img)
+        if type == "text":
+               img = img.resize((txt_w,txt_h)) 
+        if type == "minute":
+                img = img.resize((minute_w,minute_w))
+        if type == "logo":
+                img = img.resize((logo_w,logo_h))
+        return ImageTk.PhotoImage(img)
+
 # Globals
 text_color   = "white"
 minute_color = "white"
 logo_color   = "white"
 text_img     = "text/art.jpg"
 use_img      = True
+global img
 
 
 # zmg server setup
@@ -51,21 +62,17 @@ logo_w = 80
 logo_h = 90
 
 
+
 # Image initiation
-def get_image(img, type):
-        img = Image.open("text_clock/media/"+img)
-        if type == "text":
-               img = img.resize((txt_w,txt_h)) 
-        if type == "minute":
-                img = img.resize((minute_w,minute_w))
-        if type == "logo":
-                img = img.resize((logo_w,logo_h))
-        return ImageTk.PhotoImage(img)
+
+
+
 def change_image(type):
         imgs = os.listdir("text_clock/media/"+type)
         for i,file in enumerate(imgs):
             if file == text_img: 
                  text_img = imgs[(i+1)%len(imgs)]
+        img = get_image(text_img,"text")
         use_img = True
 
 cropped_tk_imgs = []
@@ -136,7 +143,7 @@ def set_letter(x,y,c):
         canvas.itemconfig(letter_rects[x][y], fill=c)
 def set_letter_img(x,y,c):
         set_letter(x,y,"#ABABAB")
-        canvas.create_image(corner1.x,corner1.y, anchor=NW, image=get_image(text_img,"text"))
+        canvas.create_image(corner1.x,corner1.y, anchor=NW, image=img)
         for x in range(11):
                 for y in range(10):
                         curr_color= canvas.itemcget(letter_rects[x][y], "fill")
@@ -312,7 +319,6 @@ def update_clock():
                 except:
                         break
 
-
         clear_clock()
         if(use_img):
                 write_time(text_color,minute_color,set_letter_img)
@@ -341,6 +347,7 @@ def handle_user_msg(msg):
                 pass
 
 
+img = get_image(text_img,"text")
 root.after(500,update_clock)
 root.mainloop()
 
