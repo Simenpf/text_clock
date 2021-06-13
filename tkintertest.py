@@ -5,8 +5,25 @@ from PIL import ImageTk,Image
 import time
 from datetime import datetime
 from collections import namedtuple
+import zmq
+import os
 
-# Root setup
+# Globals
+text_color   = "white"
+minute_color = "white"
+logo_color   = "white"
+text_img     = "text/art.jpg"
+use_img      = True
+
+
+# zmg server setup
+context = zmq.Context()
+socket = context.socket(zmq.REP)
+socket.bind("tcp://*:5555")
+global msg
+
+
+# Window root setup
 root = Tk()
 root.attributes('-fullscreen', True)
 root.overrideredirect(False)
@@ -18,12 +35,10 @@ root.bind("<Escape>", lambda event:root.destroy())
 canvas = Canvas(root, bg='black', highlightthickness=0)
 canvas.pack(fill=BOTH, expand=True) 
 
-# Positional arguments
+# Positional definitions
 root.update_idletasks()
 w = root.winfo_width()
 h = root.winfo_height()
-print(w)
-print(h)
 txt_wborder=220
 txt_hborder=90
 txt_hoffset=25
@@ -32,13 +47,26 @@ txt_h = h-2*txt_hborder
 letter_w = (w-2*txt_wborder)/11
 letter_h = (h-2*txt_hborder)/10
 minute_w = 60
-
-#img = ImageTk.PhotoImage(Image.open("media/test.png")) 
-img = Image.open("text_clock/media/colorgradient1.png")
-img = img.resize((txt_w,txt_h))
-img_tk = ImageTk.PhotoImage(img)
+logo_w = 80
+logo_h = 90
 
 
+# Image initiation
+def get_image(img, type):
+        img = Image.open("text_clock/media/"+img)
+        if type == "text":
+               img = img.resize((txt_w,txt_h)) 
+        if type == "minute":
+                img = img.resize((minute_w,minute_w))
+        if type == "logo":
+                img = img.resize((logo_w,logo_h))
+        return ImageTk.PhotoImage(img)
+def change_image(type):
+        imgs = os.listdir("text_clock/media/"+type)
+        for i,file in enumerate(imgs):
+            if file == text_img: 
+                 text_img = imgs[(i+1)%len(imgs)]
+        use_img = True
 
 cropped_tk_imgs = []
 letter_rects = []
@@ -58,14 +86,7 @@ for x in range(11):
                 x1 = x0 + letter_w
                 y1 = y0 + letter_h
                 letter_rects[x].append(canvas.create_rectangle(x0, y0, x1, y1, fill='black'))
-#img = Image.open("media/art.jpg")
-#img_cropped = img.crop([0, 0, letter_w, letter_h])
-#img_tk = ImageTk.PhotoImage(img_cropped)
-#canvas.itemconfig(letter_imgs[0][5], image=img_tk)
-#img2 = Image.open("media/colorgradient1.png")
-#img_cropped2 = img2.crop([0, 0, letter_w, letter_h])
-#img_tk2 = ImageTk.PhotoImage(img_cropped2)
-#canvas.itemconfig(letter_imgs[1][5], image=img_tk2)
+
 
 Pos = namedtuple("Pos", "x y")
 corner1 = Pos(txt_wborder,     txt_hborder -txt_hoffset)
@@ -115,7 +136,7 @@ def set_letter(x,y,c):
         canvas.itemconfig(letter_rects[x][y], fill=c)
 def set_letter_img(x,y,c):
         set_letter(x,y,"#ABABAB")
-        canvas.create_image(corner1.x,corner1.y, anchor=NW, image=img_tk)
+        canvas.create_image(corner1.x,corner1.y, anchor=NW, image=get_image(text_img,"text"))
         for x in range(11):
                 for y in range(10):
                         curr_color= canvas.itemcget(letter_rects[x][y], "fill")
@@ -283,19 +304,44 @@ def clear_clock():
      set_all_letters("black",set_letter)
      set_minutes(4,"black")
 def update_clock():
-     clear_clock()
-     write_time("white","white",set_letter_img)
-     write_am_pm("#909090","#707070",set_letter)
-     sec = datetime.now().second
-     if sec%2:
-         set_logo("green")
-     else:
-         set_logo("blue")
-     root.after(1000, update_clock)
+        # Handle requests from user
+        while(True):
+                try:
+                        msg = socket.recv(flags = zmq.NOBLOCK)
+                        handle_user_msg(msg)
+                except:
+                        break
 
 
-root.after(1000,update_clock)
+        clear_clock()
+        if(use_img):
+                write_time(text_color,minute_color,set_letter_img)
+        else:
+                write_time(text_color,minute_color,set_letter)   
+        write_am_pm("#909090","#707070",set_letter)
+        sec = datetime.now().second
+        set_logo(logo_color)
+        root.after(500, update_clock)
 
+def handle_user_msg(msg):
+        if(msg == "img"):
+                print("!")
+                change_image()
+        if(msg == "color_change"):
+                #change_color()
+                pass
+        if(msg == "alarm_off"):
+                #alarm_off()
+                pass
+        if(msg == "snake_left"):
+                #snake_left()
+                pass
+        if(msg == "snake_right"):
+                #snake_right()
+                pass
+
+
+root.after(500,update_clock)
 root.mainloop()
 
      
