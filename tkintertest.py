@@ -34,7 +34,7 @@ letter_h = (h-2*txt_hborder)/10
 minute_w = 60
 
 #img = ImageTk.PhotoImage(Image.open("media/test.png")) 
-img = Image.open("text_clock/media/art.jpg")
+img = Image.open("text_clock/media/colorgradient1.png")
 img = img.resize((txt_w,txt_h))
 img_tk = ImageTk.PhotoImage(img)
 
