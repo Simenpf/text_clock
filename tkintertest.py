@@ -79,7 +79,7 @@ def change_image():
                  print(text_img)
                  use_img = True
                  return
-def change_color():
+def change_text_color():
         print("Changing colors")
         global colors
         global use_img
@@ -90,6 +90,26 @@ def change_color():
                 if color == text_color:
                         print(color)
                         text_color = colors[(i+1)%len(colors)]
+                        return
+def change_logo_color():
+        print("Changing colors")
+        global colors
+        global logo_color
+        for i, color in enumerate(colors):
+                print(color)
+                if color == logo_color:
+                        print(color)
+                        logo_color = colors[(i+1)%len(colors)]
+                        return
+def change_minute_color():
+        print("Changing colors")
+        global colors
+        global minute_color
+        for i, color in enumerate(colors):
+                print(color)
+                if color == minute_color:
+                        print(color)
+                        minute_color = colors[(i+1)%len(colors)]
                         return
                         
         
@@ -327,10 +347,6 @@ def clear_clock():
 def update_clock():
         global logo_color
         global use_img
-        if(logo_color == "white"):
-                logo_color = "black"
-        else:
-                logo_color = "white"
         # Handle requests from user
         while(True):
                 try:
@@ -359,9 +375,13 @@ def update_clock():
 def handle_user_msg(msg):
         if(msg == b"img"):
                 change_image()
-        if(msg == b"col"):
+        if(msg == b"txtcol"):
                 print("Color change")
-                change_color()
+                change_text_color()
+        if(msg == b"logocol"):
+                change_logo_color()
+        if(msg == b"mincol"):
+                change_minute_color()
         if(msg == "alarm_off"):
                 #alarm_off()
                 pass
