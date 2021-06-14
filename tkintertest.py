@@ -21,7 +21,7 @@ use_img      = True
 context = zmq.Context()
 socket = context.socket(zmq.REP)
 socket.bind("tcp://*:5555")
-global msg
+
 
 
 # Window root setup
@@ -320,6 +320,7 @@ def update_clock():
                         handle_user_msg(msg)
                         print("Recieved input!")
                 except:
+                        print("No recieved input!")
                         break
         clear_clock()
         if(use_img):
