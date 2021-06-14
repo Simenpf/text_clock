@@ -9,14 +9,12 @@ import zmq
 import os
 
 
-
 # Globals
 text_color   = "white"
 minute_color = "white"
 logo_color   = "white"
 text_img     = "art.jpg"
 use_img      = True
-
 
 
 # zmg server setup
@@ -34,9 +32,11 @@ root.wm_attributes("-topmost", 1)
 root.focus_set()
 root.bind("<Escape>", lambda event:root.destroy())
 
+
 # Canvas setup
 canvas = Canvas(root, bg='black', highlightthickness=0)
 canvas.pack(fill=BOTH, expand=True) 
+
 
 # Positional definitions
 root.update_idletasks()
@@ -54,13 +54,14 @@ logo_w = 80
 logo_h = 90
 
 
-
 # Image initiation
 def update_image_tk():
         global img
         global text_img
         img = Image.open("text_clock/media/text/"+text_img)
         img = img.resize((txt_w,txt_h)) 
+        img = ImageTk.PhotoImage(img)
+
 update_image_tk()
 
 def change_image():
@@ -69,10 +70,10 @@ def change_image():
         global img
         imgs = os.listdir("text_clock/media/text/")
         for i,file in enumerate(imgs):
-            print(file)
             if file == text_img: 
                  text_img = imgs[(i+1)%len(imgs)]
-                 update_image_tk(text_img,"text")
+                 update_image_tk()
+                 print(text_img)
                  use_img = True
                  return
 
@@ -320,16 +321,13 @@ def update_clock():
                         print("Recieved input!")
                 except:
                         break
-
         clear_clock()
         if(use_img):
                 write_time(text_color,minute_color,set_letter_img)
         else:
                 write_time(text_color,minute_color,set_letter)   
         write_am_pm("#909090","#707070",set_letter)
-        sec = datetime.now().second
         set_logo(logo_color)
-        print("tick")
         root.after(500, update_clock)
 
 def handle_user_msg(msg):
