@@ -19,7 +19,7 @@ use_img      = True
 
 # zmg server setup
 context = zmq.Context()
-socket = context.socket(zmq.REP)
+socket = context.socket(zmq.PULL)
 socket.bind("tcp://*:5555")
 
 
@@ -53,6 +53,7 @@ minute_w = 60
 logo_w = 80
 logo_h = 90
 
+colors = ["white","blue","green","yellow"]
 
 # Image initiation
 def update_image_tk():
@@ -68,6 +69,8 @@ def change_image():
         print("Changing image...")
         global text_img
         global img
+        global use_img
+        use_img = True
         imgs = os.listdir("text_clock/media/text/")
         for i,file in enumerate(imgs):
             if file == text_img: 
@@ -76,8 +79,20 @@ def change_image():
                  print(text_img)
                  use_img = True
                  return
-
-cropped_tk_imgs = []
+def change_color():
+        print("Changing colors")
+        global colors
+        global use_img
+        global text_color
+        use_img = False
+        for i, color in enumerate(colors):
+                print(color)
+                if color == text_color:
+                        print(color)
+                        text_color = colors[(i+1)%len(colors)]
+                        return
+                        
+        
 letter_rects = []
 letter_imgs  = []
 minute_rects = []
@@ -108,21 +123,13 @@ minute_rects.append(canvas.create_rectangle(corner2.x,corner2.y,corner2.x+minute
 minute_rects.append(canvas.create_rectangle(corner3.x,corner3.y,corner3.x+minute_w,corner3.y+minute_w))
 minute_rects.append(canvas.create_rectangle(corner4.x,corner4.y,corner4.x-minute_w,corner4.y+minute_w))
 
-#minute_imgs.append(canvas.create_image(corner1.x,corner1.y, anchor=SE, image=img))
-#minute_imgs.append(canvas.create_image(corner2.x,corner2.y, anchor=SW, image=img))
-#minute_imgs.append(canvas.create_image(corner3.x,corner3.y, anchor=NW, image=img))
-#minute_imgs.append(canvas.create_image(corner4.x,corner4.y, anchor=NE, image=img))
 
 logo_rect = canvas.create_rectangle(w/2-40,h-90,w/2+40,h,fill="black")
-#logo_img  = canvas.create_image(w/2-40,h-90, anchor=NW, image=img)
 
 
 
 def set_logo(c):
      canvas.itemconfig(logo_rect, fill=c)
-def set_logo_img(img):
-     canvas.itemconfig(logo_img, image=img)
-
 def set_minute(m,c):
         canvas.itemconfig(minute_rects[m-1], fill=c)
 def set_minutes(m,c):
@@ -140,12 +147,16 @@ def set_minutes(m,c):
                 set_minute(2,c)
                 set_minute(3,c)
                 set_minute(4,c)
-
 def set_letter(x,y,c):
         canvas.itemconfig(letter_rects[x][y], fill=c)
 def set_letter_img(x,y,c):
-        set_letter(x,y,"#ABABAB")
-        canvas.create_image(corner1.x,corner1.y, anchor=NW, image=img)
+        canvas.itemconfig(letter_rects[x][y], fill="#ABABAB")
+        global canvas_image
+        try:
+                canvas.delete(canvas_image)
+        except:
+                pass
+        canvas_image = canvas.create_image(corner1.x, corner1.y, anchor=NW, image=img)
         for x in range(11):
                 for y in range(10):
                         curr_color= canvas.itemcget(letter_rects[x][y], "fill")
@@ -154,7 +165,8 @@ def set_letter_img(x,y,c):
                                 y0 = txt_hborder+y*letter_h-txt_hoffset
                                 x1 = x0 + letter_w
                                 y1 = y0 + letter_h
-                                letter_rects[x].append(canvas.create_rectangle(x0, y0, x1, y1, fill=curr_color))
+                                canvas.delete(letter_rects[x][y])
+                                letter_rects[x][y]=canvas.create_rectangle(x0, y0, x1, y1, fill=curr_color)
                                 
 
 def set_letters(letters,c,set_letter):
@@ -314,6 +326,7 @@ def clear_clock():
      set_minutes(4,"black")
 def update_clock():
         global logo_color
+        global use_img
         if(logo_color == "white"):
                 logo_color = "black"
         else:
@@ -332,17 +345,23 @@ def update_clock():
         if(use_img):
                 write_time(text_color,minute_color,set_letter_img)
         else:
-                write_time(text_color,minute_color,set_letter)   
+                global canvas_image
+                try:
+                        canvas.delete(canvas_image)
+                except:
+                        pass
+                write_time(text_color,minute_color,set_letter)
         write_am_pm("#909090","#707070",set_letter)
         set_logo(logo_color)
         root.after(500, update_clock)
 
+
 def handle_user_msg(msg):
         if(msg == b"img"):
                 change_image()
-        if(msg == "color_change"):
-                #change_color()
-                pass
+        if(msg == b"col"):
+                print("Color change")
+                change_color()
         if(msg == "alarm_off"):
                 #alarm_off()
                 pass

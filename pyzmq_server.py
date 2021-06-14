@@ -12,7 +12,7 @@ while True:
         print(message)
     except:
         print("No message")
-
+    finally:
     #  Do some 'work'
 
     #  Send reply back to client
