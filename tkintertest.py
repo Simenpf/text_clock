@@ -313,10 +313,11 @@ def clear_clock():
      set_all_letters("black",set_letter)
      set_minutes(4,"black")
 def update_clock():
+        global logo_color
         if(logo_color == "white"):
-                logo_color == "black"
+                logo_color = "black"
         else:
-                logo_color == "white"
+                logo_color = "white"
         # Handle requests from user
         while(True):
                 try:
