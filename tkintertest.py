@@ -8,23 +8,15 @@ from collections import namedtuple
 import zmq
 import os
 
-def get_image(img, type):
-        img = Image.open("text_clock/media/"+img)
-        if type == "text":
-               img = img.resize((txt_w,txt_h)) 
-        if type == "minute":
-                img = img.resize((minute_w,minute_w))
-        if type == "logo":
-                img = img.resize((logo_w,logo_h))
-        return ImageTk.PhotoImage(img)
+
 
 # Globals
 text_color   = "white"
 minute_color = "white"
 logo_color   = "white"
-text_img     = "text/art.jpg"
+text_img     = "art.jpg"
 use_img      = True
-global img
+
 
 
 # zmg server setup
@@ -64,16 +56,25 @@ logo_h = 90
 
 
 # Image initiation
+def update_image_tk():
+        global img
+        global text_img
+        img = Image.open("text_clock/media/text/"+text_img)
+        img = img.resize((txt_w,txt_h)) 
+update_image_tk()
 
-
-
-def change_image(type):
-        imgs = os.listdir("text_clock/media/"+type)
+def change_image():
+        print("Changing image...")
+        global text_img
+        global img
+        imgs = os.listdir("text_clock/media/text/")
         for i,file in enumerate(imgs):
+            print(file)
             if file == text_img: 
                  text_img = imgs[(i+1)%len(imgs)]
-        img = get_image(text_img,"text")
-        use_img = True
+                 update_image_tk(text_img,"text")
+                 use_img = True
+                 return
 
 cropped_tk_imgs = []
 letter_rects = []
@@ -316,6 +317,7 @@ def update_clock():
                 try:
                         msg = socket.recv(flags = zmq.NOBLOCK)
                         handle_user_msg(msg)
+                        print("Recieved input!")
                 except:
                         break
 
@@ -327,11 +329,11 @@ def update_clock():
         write_am_pm("#909090","#707070",set_letter)
         sec = datetime.now().second
         set_logo(logo_color)
+        print("tick")
         root.after(500, update_clock)
 
 def handle_user_msg(msg):
         if(msg == b"img"):
-                print("!")
                 change_image()
         if(msg == "color_change"):
                 #change_color()
@@ -347,7 +349,7 @@ def handle_user_msg(msg):
                 pass
 
 
-img = get_image(text_img,"text")
+
 root.after(500,update_clock)
 root.mainloop()
 
