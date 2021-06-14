@@ -321,6 +321,7 @@ def update_clock():
         # Handle requests from user
         while(True):
                 try:
+                        print("Looking for input...")
                         msg = socket.recv(flags = zmq.NOBLOCK)
                         handle_user_msg(msg)
                         print("Recieved input!")
