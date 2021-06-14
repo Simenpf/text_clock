@@ -330,7 +330,7 @@ def update_clock():
         root.after(500, update_clock)
 
 def handle_user_msg(msg):
-        if(msg == "img"):
+        if(msg == b"img"):
                 print("!")
                 change_image()
         if(msg == "color_change"):

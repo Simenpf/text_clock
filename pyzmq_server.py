@@ -8,7 +8,8 @@ socket.RCVTIMEO = 1000
 while True:
     #  Wait for next request from client
     try:
-        message = socket.recv()
+        message = socket.recv_string()
+        print(message)
     except:
         print("No message")
 
