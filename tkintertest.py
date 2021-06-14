@@ -319,15 +319,15 @@ def update_clock():
         else:
                 logo_color = "white"
         # Handle requests from user
-        #while(True):
-        #        try:
-        #                print("Looking for input...")
-        #               msg = socket.recv(flags = zmq.NOBLOCK)
-        #                handle_user_msg(msg)
-        #                print("Recieved input!")
-        #        except:
-        #                print("No recieved input!")
-        #                break
+        while(True):
+                try:
+                        print("Looking for input...")
+                        msg = socket.recv(flags = zmq.NOBLOCK)
+                        handle_user_msg(msg)
+                        print("Recieved input!")
+                except:
+                        print("No recieved input!")
+                        break
         clear_clock()
         if(use_img):
                 write_time(text_color,minute_color,set_letter_img)
