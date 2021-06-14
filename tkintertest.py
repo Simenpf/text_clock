@@ -53,7 +53,7 @@ minute_w = 60
 logo_w = 80
 logo_h = 90
 
-colors = ["white","blue","green","yellow"]
+colors = ["white","blue","green","yellow","#E99497","#B3E283","#3EDBF0"]
 
 # Image initiation
 def update_image_tk():
