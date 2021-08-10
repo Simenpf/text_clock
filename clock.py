@@ -139,7 +139,7 @@ def write_time(c,c2,set_letter, set_minute):
         write("ten",c,set_letter)
     elif (hour == 11) or (hour == 23):
         write("eleven",c,set_letter)
-    elif (hour == 12) or (hour == 24):
+    elif (hour == 12) or (hour == 24) or (hour == 0):
         write("twelve",c,set_letter)
 
     # Extra minutes
