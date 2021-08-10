@@ -10,9 +10,10 @@ import os
 
 
 # Globals
+bg_color     = '#202020'
 text_color   = "white"
-minute_color = "white"
-logo_color   = "white"
+minute_color = "yellow"
+logo_color   = "#202020"
 text_img     = "art.jpg"
 use_img      = True
 
@@ -34,7 +35,7 @@ root.bind("<Escape>", lambda event:root.destroy())
 
 
 # Canvas setup
-canvas = Canvas(root, bg='black', highlightthickness=0)
+canvas = Canvas(root, bg=bg_color, highlightthickness=0)
 canvas.pack(fill=BOTH, expand=True) 
 
 
@@ -43,6 +44,7 @@ root.update_idletasks()
 w = root.winfo_width()
 h = root.winfo_height()
 txt_wborder=220
+txt_woffset=20
 txt_hborder=90
 txt_hoffset=25
 txt_w = w-2*txt_wborder
@@ -53,7 +55,7 @@ minute_w = 60
 logo_w = 80
 logo_h = 90
 
-colors = ["white","blue","green","yellow","#E99497","#B3E283","#3EDBF0"]
+colors = ["blue","white","#ffff00","yellow","#E99497","#B3E283","#3EDBF0"]
 
 # Image initiation
 def update_image_tk():
@@ -125,7 +127,7 @@ for x in range(11):
         new2 = []
         letter_imgs.append(new2)
         for y in range(10):
-                x0 = txt_wborder+x*letter_w
+                x0 = txt_wborder+x*letter_w-txt_woffset
                 y0 = txt_hborder+y*letter_h-txt_hoffset
                 x1 = x0 + letter_w
                 y1 = y0 + letter_h
@@ -133,10 +135,10 @@ for x in range(11):
 
 
 Pos = namedtuple("Pos", "x y")
-corner1 = Pos(txt_wborder,     txt_hborder -txt_hoffset)
-corner2 = Pos(w - txt_wborder, txt_hborder - txt_hoffset)
-corner3 = Pos(w - txt_wborder, h - txt_hborder - txt_hoffset)
-corner4 = Pos(txt_wborder,     h - txt_hborder - txt_hoffset)
+corner1 = Pos(txt_wborder-txt_woffset,     txt_hborder -txt_hoffset)
+corner2 = Pos(w - txt_wborder-txt_woffset, txt_hborder - txt_hoffset)
+corner3 = Pos(w - txt_wborder-txt_woffset, h - txt_hborder - txt_hoffset)
+corner4 = Pos(txt_wborder-txt_woffset,     h - txt_hborder - txt_hoffset)
 
 minute_rects.append(canvas.create_rectangle(corner1.x,corner1.y,corner1.x-minute_w,corner1.y-minute_w))
 minute_rects.append(canvas.create_rectangle(corner2.x,corner2.y,corner2.x+minute_w,corner2.y-minute_w))
@@ -144,7 +146,7 @@ minute_rects.append(canvas.create_rectangle(corner3.x,corner3.y,corner3.x+minute
 minute_rects.append(canvas.create_rectangle(corner4.x,corner4.y,corner4.x-minute_w,corner4.y+minute_w))
 
 
-logo_rect = canvas.create_rectangle(w/2-40,h-90,w/2+40,h,fill="black")
+logo_rect = canvas.create_rectangle(w/2-60,h-90,w/2+40,h,fill="black")
 
 
 
@@ -342,8 +344,8 @@ def write_am_pm(c_am,c_pm,set_letter):
     else:
         write("am",c_am,set_letter)
 def clear_clock():
-     set_all_letters("black",set_letter)
-     set_minutes(4,"black")
+     set_all_letters(bg_color,set_letter)
+     set_minutes(4,bg_color)
 def update_clock():
         global logo_color
         global use_img
@@ -367,7 +369,7 @@ def update_clock():
                 except:
                         pass
                 write_time(text_color,minute_color,set_letter)
-        write_am_pm("#909090","#707070",set_letter)
+        write_am_pm("#202020","#202020",set_letter)
         set_logo(logo_color)
         root.after(500, update_clock)
 
@@ -393,7 +395,7 @@ def handle_user_msg(msg):
                 pass
 
 
-
+change_text_color();
 root.after(500,update_clock)
 root.mainloop()
 
