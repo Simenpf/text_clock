@@ -25,7 +25,7 @@ socket.bind("tcp://*:5555")
 
 # Window root setup
 root = Tk()
-root.attributes('-fullscreen', True)
+#root.attributes('-fullscreen', True)
 root.overrideredirect(False)
 root.wm_attributes("-topmost", 1)
 root.focus_set()

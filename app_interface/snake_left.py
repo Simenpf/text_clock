@@ -10,5 +10,5 @@ socket.connect("tcp://localhost:5555")
 
 
 
-socket.send(b"snake_left")
+socket.send(b"left")
 socket.close()
