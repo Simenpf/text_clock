@@ -120,9 +120,10 @@ def move_snake():
 
 def move_apple():
     global apple
-    apple = apple._replace(x=randint(0,11))
-    apple = apple._replace(y=randint(0,10))
-
+    apple = apple._replace(x=randint(0,10))
+    apple = apple._replace(y=randint(0,9))
+    print(apple.x)
+    print(apple.y)
 def draw_game():
     if(body[0] == apple):
         body.append(body[-1])
