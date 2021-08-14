@@ -182,6 +182,15 @@ def update_clock():
             draw_game()
         root.after(200, update_clock)
 
+def key(event):
+    """shows key or tk code for the key"""
+    if event.keysym == 'Escape':
+        root.destroy()
+    if event.keysym == 'Right':
+            snake_left()
+    if event.keysym == 'Left':
+            snake_right()
+
 
 def handle_user_msg(msg):
         if(msg == b"left"):
@@ -191,6 +200,6 @@ def handle_user_msg(msg):
                 snake_right()
                 pass
 
-
+root.bind_all('<Key>', key)
 root.after(200,update_clock)
 root.mainloop()
