@@ -100,21 +100,27 @@ def set_letter(x,y,c):
 
 #Snake
 start = False
-body = [Pos(0,0)]
+body = [Pos(3,3)]
 dir = "right"
 apple = Pos(5,5)
+
+def checkIfDuplicates(listOfElems):
+    if len(listOfElems) == len(set(listOfElems)):
+        return False
+    else:
+        return True
 
 def move_snake():
     for i in range(len(body)-1,-1,-1):
         if(i == 0):
             if(dir == "right"):
-                body[i] = body[i]._replace(x=(body[0].x+1)%11) 
+                body[i] = body[i]._replace(x=(body[0].x+1)) 
             if(dir == "left"):
-                body[i] = body[i]._replace(x=(body[0].x-1)%11) 
+                body[i] = body[i]._replace(x=(body[0].x-1)) 
             if(dir == "up"):
-                body[i] = body[i]._replace(y=(body[0].y+1)%10) 
+                body[i] = body[i]._replace(y=(body[0].y+1)) 
             if(dir == "down"):
-                body[i] = body[i]._replace(y=(body[0].y-1)%10) 
+                body[i] = body[i]._replace(y=(body[0].y-1)) 
         else:
             body[i]=body[i-1]
 
@@ -131,8 +137,9 @@ def draw_game():
     set_letter(apple.x,apple.y,"red")
     move_snake()
     if(body[0].x == 11 or body[0].x == -1 or body[0].y == 10 or body[0].y == -1):
-        #exit()
-        pass
+        exit()
+    if(checkIfDuplicates(body)):
+        exit()
     for b in body:
         set_letter(b.x,b.y,"#48ff00")
 
@@ -201,6 +208,7 @@ def handle_user_msg(msg):
                 snake_right()
                 pass
 
+move_apple()
 root.bind_all('<Key>', key)
 root.after(200,update_clock)
 root.mainloop()
