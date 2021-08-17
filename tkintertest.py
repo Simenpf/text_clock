@@ -11,27 +11,60 @@ from clock import *
 
 # Globals
 bg_color     = '#202020'
-bg_img       = "birch.jpg"
 text_color   = "yellow"
 minute_color = "yellow"
-logo_color   = "#202020"
+logo_color   = bg_color
+am_color     = bg_color
+pm_color     = bg_color
 text_img     = "art.jpg"
 use_img      = False
+text_r       = 0
+text_g       = 0
+text_b       = 0
+
+def use_text_rgb():
+        global text_color
+        rgb = (text_r, text_g, text_b)
+        text_color = "#%02x%02x%02x" % rgb   
 
 
-# zmg server setup
+# zmg server setup (For app interface)
 context = zmq.Context()
 socket = context.socket(zmq.PULL)
 socket.bind("tcp://*:5555")
+
+# User interface
+def key(event):
+    """shows key or tk code for the key"""
+    if event.keysym == 'Escape':
+        root.destroy()
+    if event.keysym == 'Right':
+            print("Left")
+    if event.keysym == 'Left':
+            print("Right")
+    if event.keysym == 'r':
+            global text_r
+            text_r = (text_r+4)%255
+            use_text_rgb()
+    if event.keysym == 'g':
+            global text_g
+            text_g = (text_g+4)%255
+            use_text_rgb()
+    if event.keysym == 'b':
+            global text_b
+            text_b = (text_b+4)%255
+            use_text_rgb()
+    if event.keysym == 'p':
+            print("Current colors:")
+            print("R: "+str(text_r))
+            print("G: "+str(text_g))
+            print("B: "+str(text_b))
 
 
 # Window root setup
 root = Tk()
 root.attributes('-fullscreen', True)
-root.overrideredirect(False)
-root.wm_attributes("-topmost", 1)
-root.focus_set()
-root.bind("<Escape>", lambda event:root.destroy())
+root.bind_all('<Key>', key)
 
 
 # Canvas setup
@@ -39,23 +72,24 @@ canvas = Canvas(root, bg=bg_color, highlightthickness=0)
 canvas.pack(fill=BOTH, expand=True) 
 
 
-# Positional definitions
-root.update_idletasks()
+# Positional definitions (in pixels)
+root.update_idletasks() #Update hight and width data
 w = root.winfo_width()
 h = root.winfo_height()
 
-txt_wborder=220
-txt_woffset=20
-txt_hborder=90
-txt_hoffset=25
-txt_w = w-2*txt_wborder
-txt_h = h-2*txt_hborder
-letter_w = (w-2*txt_wborder)/11
-letter_h = (h-2*txt_hborder)/10
-minute_w = 60
-logo_w = 80
-logo_h = 90
+txt_wborder=220                 #Distance from left and right side, to the closest letter
+txt_woffset=20                  #The horisontal shift of the text (if monitor is not horizontally centered behind text)
+txt_hborder=90                  #Distance from top and bottom, to the closest letter
+txt_hoffset=25                  #The vertical shift of the text (if monitor is not vertically sentered behind text)
+txt_w = w-2*txt_wborder         #Total width of text-block
+txt_h = h-2*txt_hborder         #Total height of text-block
+letter_w = (w-2*txt_wborder)/11 #Width of a letter
+letter_h = (h-2*txt_hborder)/10 #Height of a letter
+minute_w = 60                   #Width of a minute-dot
+logo_w = 80                     #Width of the logo
+logo_h = 90                     #Height of the logo
 
+# Should be themes to choose from in app
 colors = ["blue","white","#ffff00","yellow","#E99497","#B3E283","#3EDBF0"]
 
 # Image initiation
@@ -69,7 +103,6 @@ def update_image_tk():
 update_image_tk()
 
 def change_image():
-        print("Changing image...")
         global text_img
         global img
         global use_img
@@ -79,43 +112,37 @@ def change_image():
             if file == text_img: 
                  text_img = imgs[(i+1)%len(imgs)]
                  update_image_tk()
-                 print(text_img)
                  use_img = True
                  return
+
 def change_text_color():
-        print("Changing colors")
         global colors
         global use_img
         global text_color
         use_img = False
         for i, color in enumerate(colors):
-                print(color)
                 if color == text_color:
-                        print(color)
                         text_color = colors[(i+1)%len(colors)]
                         return
+
 def change_logo_color():
-        print("Changing colors")
         global colors
         global logo_color
         for i, color in enumerate(colors):
-                print(color)
                 if color == logo_color:
-                        print(color)
                         logo_color = colors[(i+1)%len(colors)]
                         return
+
 def change_minute_color():
-        print("Changing colors")
         global colors
         global minute_color
         for i, color in enumerate(colors):
-                print(color)
                 if color == minute_color:
-                        print(color)
                         minute_color = colors[(i+1)%len(colors)]
                         return
                         
-        
+
+# Tkinter objects initiation 
 letter_rects = []
 letter_imgs  = []
 minute_rects = []
@@ -180,16 +207,16 @@ def set_letter_img(x,y,c):
 def update_clock():
         global logo_color
         global use_img
+
         # Handle requests from user
         while(True):
                 try:
-                        print("Looking for input...")
                         msg = socket.recv(flags = zmq.NOBLOCK)
                         handle_user_msg(msg)
-                        print("Recieved input!")
                 except:
-                        print("No recieved input!")
                         break
+
+        #Clear screen and redraw
         clear_clock(bg_color, set_letter, set_minute)
         if(use_img):
                 write_time(text_color,minute_color,set_letter_img, set_minute)
@@ -200,16 +227,16 @@ def update_clock():
                 except:
                         pass
                 write_time(text_color,minute_color,set_letter, set_minute)
-        write_am_pm("#202020","#202020",set_letter)
-        set_logo(logo_color)
-        root.after(500, update_clock)
+
+        write_am_pm(am_color,pm_color,set_letter)
+        set_logo(logo_color) 
+        root.after(100, update_clock)
 
 
 def handle_user_msg(msg):
         if(msg == b"img"):
                 change_image()
         if(msg == b"txtcol"):
-                print("Color change")
                 change_text_color()
         if(msg == b"logocol"):
                 change_logo_color()
@@ -225,7 +252,5 @@ def handle_user_msg(msg):
                 #snake_right()
                 pass
 
-
-
-root.after(500,update_clock)
+root.after(100,update_clock)
 root.mainloop()
