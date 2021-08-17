@@ -7,7 +7,7 @@ from collections import namedtuple
 import zmq
 import os
 from clock import *
-
+from random import randint
 
 # Globals
 bg_color     = '#202020'
@@ -21,6 +21,7 @@ use_img      = False
 text_r       = 0
 text_g       = 0
 text_b       = 0
+
 
 def use_text_rgb():
         global text_color
@@ -39,9 +40,9 @@ def key(event):
     if event.keysym == 'Escape':
         root.destroy()
     if event.keysym == 'Right':
-            print("Left")
+            snake_left()
     if event.keysym == 'Left':
-            print("Right")
+            snake_right()
     if event.keysym == 'r':
             global text_r
             text_r = (text_r+4)%255
@@ -204,6 +205,103 @@ def set_letter_img(x,y,c):
                                 letter_rects[x][y]=canvas.create_rectangle(x0, y0, x1, y1, fill=curr_color)
                                 
 
+#Snake
+start = False
+body = [Pos(3,3)]
+dir = "right"
+apple = Pos(5,5)
+
+def init_game():
+        global start
+        global body
+        global dir
+        global apple
+        start = False
+        body = [Pos(3,3)]
+        dir = "right"
+        apple = Pos(5,5)        
+
+def checkIfDuplicates(listOfElems):
+    if len(listOfElems) == len(set(listOfElems)):
+        return False
+    else:
+        return True
+
+def move_snake():
+    for i in range(len(body)-1,-1,-1):
+        if(i == 0):
+            if(dir == "right"):
+                body[i] = body[i]._replace(x=(body[0].x+1)) 
+            if(dir == "left"):
+                body[i] = body[i]._replace(x=(body[0].x-1)) 
+            if(dir == "up"):
+                body[i] = body[i]._replace(y=(body[0].y+1)) 
+            if(dir == "down"):
+                body[i] = body[i]._replace(y=(body[0].y-1)) 
+        else:
+            body[i]=body[i-1]
+
+def move_apple():
+    global apple
+    apple = apple._replace(x=randint(0,10))
+    apple = apple._replace(y=randint(0,9))
+    print(apple.x)
+    print(apple.y)
+def draw_game():
+    global start
+    if(body[0] == apple):
+        body.append(body[-1])
+        move_apple()
+    move_snake()
+    set_letter(apple.x,apple.y,"red")
+    if(body[0].x == 11 or body[0].x == -1 or body[0].y == 10 or body[0].y == -1):
+        start = False
+        init_game()
+        return
+    if(checkIfDuplicates(body)):
+        start = False
+        init_game()
+        return
+    for b in body:
+        set_letter(b.x,b.y,"#48ff00")
+
+
+def snake_left():
+    global start
+    global dir
+    start = True
+    if(dir == "right"):
+        dir = "up"
+        return
+    if(dir == "left"):
+        dir = "down"
+        return
+    if(dir == "up"):
+        dir = "left"
+        return
+    if(dir == "down"):
+        dir = "right"
+        return
+
+def snake_right():
+    global start
+    global dir
+    start = True
+    if(dir == "right"):
+        dir = "down"
+        return
+    if(dir == "left"):
+        dir = "up"
+        return
+    if(dir == "up"):
+        dir = "right"
+        return
+    if(dir == "down"):
+        dir = "left"
+        return
+
+
+#Main loop
 def update_clock():
         global logo_color
         global use_img
@@ -215,22 +313,24 @@ def update_clock():
                         handle_user_msg(msg)
                 except:
                         break
-
         #Clear screen and redraw
         clear_clock(bg_color, set_letter, set_minute)
-        if(use_img):
-                write_time(text_color,minute_color,set_letter_img, set_minute)
-        else:
-                global canvas_image
-                try:
-                        canvas.delete(canvas_image)
-                except:
-                        pass
-                write_time(text_color,minute_color,set_letter, set_minute)
+        if(not start):
+                if(use_img):
+                        write_time(text_color,minute_color,set_letter_img, set_minute)
+                else:
+                        global canvas_image
+                        try:
+                                canvas.delete(canvas_image)
+                        except:
+                                pass
+                        write_time(text_color,minute_color,set_letter, set_minute)
 
-        write_am_pm(am_color,pm_color,set_letter)
-        set_logo(logo_color) 
-        root.after(100, update_clock)
+                write_am_pm(am_color,pm_color,set_letter)
+                set_logo(logo_color) 
+        else:
+            draw_game()    
+        root.after(200, update_clock)
 
 
 def handle_user_msg(msg):
@@ -252,5 +352,5 @@ def handle_user_msg(msg):
                 #snake_right()
                 pass
 
-root.after(100,update_clock)
+root.after(200,update_clock)
 root.mainloop()
