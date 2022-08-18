@@ -4,9 +4,9 @@ import imutils
 from screeninfo import get_monitors
 import numpy as np
 from clock import *
-import rpyc
-from rpyc.utils.server import ThreadedServer
+from flask import Flask, request, render_template
 from threading import Thread
+from PIL import ImageColor
 
 
 
@@ -104,21 +104,38 @@ def task():
 thread = threading.Thread(target=task)
 thread.start()
 
-
-# Setup rpyc server
-class ClockService(rpyc.Service):
-    global logo_color
+# Flask constructor
+app = Flask(__name__)  
+ 
+# A decorator used to tell the application
+# which URL is associated function
+@app.route('/', methods =["GET", "POST"])
+def gfg():
     global letters_color
-    global minutes_color
-    def exposed_change_logo_color(self, color):
-        global logo_color
-        logo_color = color
-    def exposed_change_letters_color(self, color):
-        global letters_color
-        letters_color = color
-    def exposed_change_minutes_color(self, color):
-        global minutes_color
-        minutes_color = color
-if __name__ == "__main__":
-    server = ThreadedServer(ClockService, port = 18812)
-    server.start()
+    if request.method == "POST":
+        color = str(request.form.get("color"))
+        color = ImageColor.getcolor(color,"RGB")
+        letters_color = (color[2],color[1],color[0])
+        return render_template("form.html")
+    return render_template("form.html")
+ 
+if __name__=='__main__':
+   app.run(host='0.0.0.0', port=80)
+
+# # Setup rpyc server
+# class ClockService(rpyc.Service):
+#     global logo_color
+#     global letters_color
+#     global minutes_color
+#     def exposed_change_logo_color(self, color):
+#         global logo_color
+#         logo_color = color
+#     def exposed_change_letters_color(self, color):
+#         global letters_color
+#         letters_color = color
+#     def exposed_change_minutes_color(self, color):
+#         global minutes_color
+#         minutes_color = color
+# if __name__ == "__main__":
+#     server = ThreadedServer(ClockService, port = 18812)
+#     server.start()
