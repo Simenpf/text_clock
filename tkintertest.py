@@ -78,6 +78,7 @@ root.update_idletasks() #Update hight and width data
 w = root.winfo_width()
 h = root.winfo_height()
 
+
 txt_wborder=220                 #Distance from left and right side, to the closest letter
 txt_woffset=20                  #The horisontal shift of the text (if monitor is not horizontally centered behind text)
 txt_hborder=90                  #Distance from top and bottom, to the closest letter
