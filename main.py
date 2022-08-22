@@ -17,6 +17,7 @@ from PIL import ImageColor
 logo_color    = (255,255,0)
 minutes_color = (0,255,255)
 letters_color = (255,0,255)
+background_color = (32,32,32)
         
         
 # Screen dimensions
@@ -59,8 +60,7 @@ for x in range(11):
 blank_image = np.zeros((screen.height,screen.width,3), np.uint8)
 canvas      = blank_image.copy()
 canvas_mask = blank_image.copy()
-canvas[:,:] = (255,255,255)
-
+canvas[:,:] = background_color
 
 def set_logo(c):
     global canvas_mask
@@ -113,9 +113,21 @@ app = Flask(__name__)
 def gfg():
     global letters_color
     if request.method == "POST":
-        color = str(request.form.get("color"))
-        color = ImageColor.getcolor(color,"RGB")
-        letters_color = (color[2],color[1],color[0])
+        # Set letter color
+        letters_color = str(request.form.get("letters_color"))
+        letters_color = ImageColor.getcolor(letters_color,"RGB")
+        letters_color = (letters_color[2],letters_color[1],letters_color[0])
+
+        # Set letter color
+        minutes_color = str(request.form.get("minutes_color"))
+        minutes_color = ImageColor.getcolor(minutes_color,"RGB")
+        minutes_color = (minutes_color[2],minutes_color[1],minutes_color[0])
+
+        # Set letter color
+        logo_color = str(request.form.get("logo_color"))
+        logo_color = ImageColor.getcolor(logo_color,"RGB")
+        logo_color = (logo_color[2],logo_color[1],logo_color[0])
+
         return render_template("form.html")
     return render_template("form.html")
  
