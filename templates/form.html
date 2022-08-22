@@ -1,8 +1,9 @@
 
 <form action="{{ url_for("gfg")}}" method="post">
-    <input type="color" name="letters_color">
-    <button type="submit">Set letter color</button>
-    <input type="color" name="minutes_color">
-    <button type="submit">Set minute color</button>
-    <input type="color" name="logo_color">
-    <button type="submit">Set logo color</button>
+    <label for="letr_col">Letter Color</label>
+    <input type="color" name="letters_color" id="letr_col">
+    <label for="min_col">Minutes Color</label>
+    <input type="color" name="minutes_color" id="min_col">
+    <label for="logo_col">Logo Color</label>
+    <input type="color" name="logo_color" id="logo_col">
+    <button type="submit">Set colors</button>

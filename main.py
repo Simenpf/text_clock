@@ -112,6 +112,8 @@ app = Flask(__name__)
 @app.route('/', methods =["GET", "POST"])
 def gfg():
     global letters_color
+    global minutes_color
+    global logo_color
     if request.method == "POST":
         # Set letter color
         letters_color = str(request.form.get("letters_color"))
