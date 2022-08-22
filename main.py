@@ -72,7 +72,7 @@ def set_letter(x,y,c):
     global canvas_mask
     canvas_mask = cv2.rectangle(canvas_mask, letters_positions[x][y][0], letters_positions[x][y][1], c, -1)
 def shift_for_offset(image, x_offset, y_offset):
-    translation_matrix = np.float32([[1, 0, x_offset], [0, 1, y_offset]])
+    translation_matrix = np.float32([[1, 0, -x_offset], [0, 1, -y_offset]])
     return cv2.warpAffine(image, translation_matrix, (screen.width, screen.height))
 def update_canvas():
     global canvas
