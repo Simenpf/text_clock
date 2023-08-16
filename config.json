@@ -1,0 +1,11 @@
+{
+    "screen_adjustment":{
+        "text_vertical_border" : 220,
+        "text_vertical_offset" : 20,
+        "text_horizontal_border" : 90,
+        "text_horizontal_offset" : 25,
+        "minute_diameter" : 60,
+        "logo_width" : 80,
+        "logo_height" : 90
+    }
+}

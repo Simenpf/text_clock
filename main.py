@@ -1,66 +1,76 @@
 import threading
 import cv2
-import imutils
 from screeninfo import get_monitors
 import numpy as np
 from clock import *
 from flask import Flask, request, render_template
-from threading import Thread
 from PIL import ImageColor
+import colors
+import json
 
-
-
-
-
+# Load config
+f = open('text_clock/config.json')
+config = json.load(f)
 
 # Initiate globals
-logo_color    = (255,255,0)
-minutes_color = (0,255,255)
-letters_color = (255,0,255)
-background_color = (32,32,32)
-        
+light_cyan = colors.get_standard_color("nice_cyan")
+logo_color    = light_cyan.bgr
+minutes_color = light_cyan.bgr
+letters_color = light_cyan.bgr
+background_color = light_cyan.bgr
         
 # Screen dimensions
-screen = get_monitors()[0]
-txt_wborder=220                              #Distance from left and right side, to the closest letter
-txt_woffset=20                               #The horisontal shift of the text (if monitor is not horizontally centered behind text)
-txt_hborder=90                               #Distance from top and bottom, to the closest letter
-txt_hoffset=25                               #The vertical shift of the text (if monitor is not vertically sentered behind text)
-txt_w = screen.width-2*txt_wborder           #Total width of text-block
-txt_h = screen.height-2*txt_hborder          #Total height of text-block
-letter_w = (screen.width-2*txt_wborder)//11  #Width of a letter
-letter_h = (screen.height-2*txt_hborder)//10 #Height of a letter
-minute_w = 60                                #Width of a minute-dot
-logo_w = 80                                  #Width of the logo
-logo_h = 90                                  #Height of the logo
+screen      = get_monitors()[0]
+txt_vborder = config["screen_adjustment"]["text_vertical_border"]    # Distance from left and right side, to the closest letter
+txt_voffset = config["screen_adjustment"]["text_vertical_offset"]    # The horisontal shift of the text (if monitor is not horizontally centered behind text)
+txt_hborder = config["screen_adjustment"]["text_horizontal_border"]  # Distance from top and bottom, to the closest letter
+txt_hoffset = config["screen_adjustment"]["text_horizontal_offset"]  # The vertical shift of the text (if monitor is not vertically sentered behind text)
+minute_d    = config["screen_adjustment"]["minute_diameter"]         # Diameter of a minute-dot
+logo_w      = config["screen_adjustment"]["logo_width"]              # Width of the logo
+logo_h      = config["screen_adjustment"]["logo_width"]              # Height of the logo
 
-# Symbol positional definitions
-logo_start      = (screen.width//2-logo_w//2,screen.height-logo_h)
-logo_end        = (screen.width//2+logo_w//2,screen.height)
-logo_positions = [logo_start,logo_end]
-minutes_positions = []
-minutes_positions.append([(txt_wborder, txt_hborder),(txt_wborder-minute_w, txt_hborder-minute_w)])
-minutes_positions.append([(txt_wborder+txt_w, txt_hborder),(txt_wborder+txt_w+minute_w, txt_hborder-minute_w)])
-minutes_positions.append([(txt_wborder+txt_w, txt_hborder+txt_h),(txt_wborder+txt_w+minute_w, txt_hborder+txt_h+minute_w)])
-minutes_positions.append([(txt_wborder, txt_hborder+txt_h),(txt_wborder-minute_w, txt_hborder+txt_h+minute_w)])
-letters_positions = []
-for x in range(11):
-    letters_positions.append([])
-    for y in range(10):
-        x0 = txt_wborder+x*letter_w
-        y0 = txt_hborder+y*letter_h
-        x1 = x0 + letter_w
-        y1 = y0 + letter_h
-        letters_positions[x].append([(x0,y0),(x1,y1)])
+def setup_screen():
+    global canvas
+    global canvas_mask
+    global logo_positions
+    global logo_positions
+    global minutes_positions
+    global letters_positions
+    global blank_image
+    global screen_updated
 
+    txt_w    = screen.width-2*txt_vborder        # Total width of text-block
+    txt_h    = screen.height-2*txt_hborder       # Total height of text-block
+    letter_w = (screen.width-2*txt_vborder)//11  # Width of a letter
+    letter_h = (screen.height-2*txt_hborder)//10 # Height of a letter
 
+    # Symbol positional definitions
+    logo_start      = (screen.width//2-logo_w//2,screen.height-logo_h)
+    logo_end        = (screen.width//2+logo_w//2,screen.height)
+    logo_positions = [logo_start,logo_end]
+    minutes_positions = []
+    minutes_positions.append([(txt_vborder, txt_hborder),(txt_vborder-minute_d, txt_hborder-minute_d)])
+    minutes_positions.append([(txt_vborder+txt_w, txt_hborder),(txt_vborder+txt_w+minute_d, txt_hborder-minute_d)])
+    minutes_positions.append([(txt_vborder+txt_w, txt_hborder+txt_h),(txt_vborder+txt_w+minute_d, txt_hborder+txt_h+minute_d)])
+    minutes_positions.append([(txt_vborder, txt_hborder+txt_h),(txt_vborder-minute_d, txt_hborder+txt_h+minute_d)])
+    letters_positions = []
+    for x in range(11):
+        letters_positions.append([])
+        for y in range(10):
+            x0 = txt_vborder+x*letter_w
+            y0 = txt_hborder+y*letter_h
+            x1 = x0 + letter_w
+            y1 = y0 + letter_h
+            letters_positions[x].append([(x0,y0),(x1,y1)])
 
+    # Initiate canvas and mask
+    blank_image = np.zeros((screen.height,screen.width,3), np.uint8)
+    canvas      = blank_image.copy()
+    canvas_mask = blank_image.copy()
+    canvas[:,:] = background_color
+    
+    screen_updated = True
 
-# Initiate canvas and mask
-blank_image = np.zeros((screen.height,screen.width,3), np.uint8)
-canvas      = blank_image.copy()
-canvas_mask = blank_image.copy()
-canvas[:,:] = background_color
 
 def set_logo(c):
     global canvas_mask
@@ -81,75 +91,90 @@ def update_canvas():
     for pos in minutes_positions:
         canvas = cv2.rectangle(canvas, pos[0], pos[1], minutes_color, -1)
 
-
-
-
-
 def task():
     global canvas
     global canvas_mask
+    global blank_image
+    global screen_updated
+
     cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
     cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
     while(True):
-        update_canvas()
-        canvas_mask = blank_image.copy()
-        write_time((255,255,255),(255,255,255),set_letter, set_minute)
-        set_logo((255,255,255))
-        masked_canvas = cv2.bitwise_and(canvas, canvas_mask)
-        masked_canvas = shift_for_offset(masked_canvas, txt_woffset, txt_hoffset)
-        cv2.imshow("window",masked_canvas)
-        key = cv2.waitKey(200)
-        if key & 0xFF == 27:
-          break
-thread = threading.Thread(target=task)
-thread.start()
+        setup_screen()
+        while screen_updated == True:
+            update_canvas()
+            canvas_mask = blank_image.copy()
+            write_time((255,255,255),(255,255,255),set_letter, set_minute)
+            set_logo((255,255,255))
+            masked_canvas = cv2.bitwise_and(canvas, canvas_mask)
+            masked_canvas = shift_for_offset(masked_canvas, txt_voffset, txt_hoffset)
+            cv2.imshow("window",masked_canvas)
+            key = cv2.waitKey(200)
+            if key & 0xFF == 27:
+              break
 
 # Flask constructor
 app = Flask(__name__)  
  
 # A decorator used to tell the application
 # which URL is associated function
-@app.route('/', methods =["GET", "POST"])
-def gfg():
+@app.route('/')
+def index():
+    return render_template("index.html")
+
+@app.route('/color_settings', methods =["GET", "POST"])
+def color_settings():
     global letters_color
     global minutes_color
     global logo_color
     if request.method == "POST":
-        # Set letter color
-        letters_color = str(request.form.get("letters_color"))
-        letters_color = ImageColor.getcolor(letters_color,"RGB")
-        letters_color = (letters_color[2],letters_color[1],letters_color[0])
+        # Set letters color
+        app_request_letters_color = str(request.form.get("letters_color"))
+        letters_color = colors.Color(app_request_letters_color).bgr
 
-        # Set letter color
-        minutes_color = str(request.form.get("minutes_color"))
-        minutes_color = ImageColor.getcolor(minutes_color,"RGB")
-        minutes_color = (minutes_color[2],minutes_color[1],minutes_color[0])
+        # Set minutes color
+        app_request_minutes_color = str(request.form.get("minutes_color"))
+        minutes_color = colors.Color(app_request_minutes_color).bgr
 
-        # Set letter color
-        logo_color = str(request.form.get("logo_color"))
-        logo_color = ImageColor.getcolor(logo_color,"RGB")
-        logo_color = (logo_color[2],logo_color[1],logo_color[0])
+        # Set logo color
+        app_request_logo_color = str(request.form.get("logo_color"))
+        logo_color = colors.Color(app_request_logo_color).bgr
 
-        return render_template("form.html")
-    return render_template("form.html")
- 
+        return render_template("color_settings.html")
+    return render_template("color_settings.html")
+
+@app.route('/screen_adjustment')
+def screen_adjustment():
+    return render_template('screen_adjustment.html', config=config)
+
+@app.route('/adjust_screen', methods=['POST'])
+def adjust_screen():
+    global logo_w
+    global logo_h
+    global txt_vborder
+    global txt_voffset
+    global txt_hborder
+    global txt_hoffset
+    global minute_d
+    global screen_updated
+    logo_w =      int(request.form['logo_width'])
+    logo_h =      int(request.form['logo_height'])
+    txt_vborder = int(request.form['txt_vborder'])
+    txt_voffset = int(request.form['txt_voffset'])
+    txt_hborder = int(request.form['txt_hborder'])
+    print(txt_hborder)
+    txt_hoffset = int(request.form['txt_hoffset'])
+    minute_d =    int(request.form['min_d'])
+    screen_updated = False
+    return ''
+
+@app.route('/fun')
+def fun():
+    return render_template('fun.html')
+
 if __name__=='__main__':
-   app.run(host='0.0.0.0', port=80)
+    setup_screen()
+    clock_thread = threading.Thread(target=task)
+    clock_thread.start()
+    app.run(host='0.0.0.0', port=80)
 
-# # Setup rpyc server
-# class ClockService(rpyc.Service):
-#     global logo_color
-#     global letters_color
-#     global minutes_color
-#     def exposed_change_logo_color(self, color):
-#         global logo_color
-#         logo_color = color
-#     def exposed_change_letters_color(self, color):
-#         global letters_color
-#         letters_color = color
-#     def exposed_change_minutes_color(self, color):
-#         global minutes_color
-#         minutes_color = color
-# if __name__ == "__main__":
-#     server = ThreadedServer(ClockService, port = 18812)
-#     server.start()

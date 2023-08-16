@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Adjustment</title>
+    <style>
+        /* Remove arrows in number selectors for Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        /* Remove arrows in number selectors for Firefox */
+        input[type=number] {
+          -moz-appearance: textfield;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: 'Helvetica Neue', sans-serif; /* Example font */
+        }
+        .adjustment-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .adjustment-label {
+            font-size: 30px;
+            margin-bottom: 15px;
+        }
+        .adjustment-input {
+            width: 68px;
+            height: 50px;
+            font-size: 30px;
+            text-align: center;
+        }
+        .increment-button {
+            font-weight: bold;
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="adjustment-container">
+            <div class="adjustment-label">Logo Width</div>
+            <button class="increment-button" onclick="incrementValue('logoWidth', -5)">-</button>
+            <input type="number" class="adjustment-input" id="logoWidth" value="250">
+            <button class="increment-button" onclick="incrementValue('logoWidth', 5)">+</button>
+        </div>
+        <div class="adjustment-container">
+            <div class="adjustment-label">Logo Height</div>
+            <button class="increment-button" onclick="incrementValue('logoHeight', -5)">-</button>
+            <input type="number" class="adjustment-input" id="logoHeight" value="250">
+            <button class="increment-button" onclick="incrementValue('logoHeight', 5)">+</button>
+        </div>
+        <div class="adjustment-container">
+            <div class="adjustment-label">Text Vertical Border</div>
+            <button class="increment-button" onclick="incrementValue('txt_vborder', -5)">-</button>
+            <input type="number" class="adjustment-input" id="txt_vborder" value="250">
+            <button class="increment-button" onclick="incrementValue('txt_vborder', 5)">+</button>
+        </div>
+        <div class="adjustment-container">
+            <div class="adjustment-label">Text Horizontal Border</div>
+            <button class="increment-button" onclick="incrementValue('txt_hborder', -5)">-</button>
+            <input type="number" class="adjustment-input" id="txt_hborder" value="250">
+            <button class="increment-button" onclick="incrementValue('txt_hborder', 5)">+</button>
+        </div>
+        <div class="adjustment-container">
+            <div class="adjustment-label">Text Vertical Offset</div>
+            <button class="increment-button" onclick="incrementValue('txt_voffset', -5)">-</button>
+            <input type="number" class="adjustment-input" id="txt_voffset" value="250">
+            <button class="increment-button" onclick="incrementValue('txt_voffset', 5)">+</button>
+        </div>
+        <div class="adjustment-container">
+            <div class="adjustment-label">Text Horizontal Offset</div>
+            <button class="increment-button" onclick="incrementValue('txt_hoffset', -5)">-</button>
+            <input type="number" class="adjustment-input" id="txt_hoffset" value="250">
+            <button class="increment-button" onclick="incrementValue('txt_hoffset', 5)">+</button>
+        </div>
+        <div class="adjustment-container">
+            <div class="adjustment-label">Minute Diameter</div>
+            <button class="increment-button" onclick="incrementValue('min_d', -5)">-</button>
+            <input type="number" class="adjustment-input" id="min_d" value="250">
+            <button class="increment-button" onclick="incrementValue('min_d', 5)">+</button>
+        </div>
+    </div>
+    
+    <!-- Add similar adjustments for other variables -->
+    <script>
+        const config = {{ config | tojson | safe }};
+        document.getElementById('logoWidth').value = config.screen_adjustment.logo_width;
+        document.getElementById('logoHeight').value = config.screen_adjustment.logo_height;
+        document.getElementById('txt_vborder').value = config.screen_adjustment.text_vertical_border;
+        document.getElementById('txt_hborder').value = config.screen_adjustment.text_horizontal_border;
+        document.getElementById('txt_voffset').value = config.screen_adjustment.text_vertical_offset;
+        document.getElementById('txt_hoffset').value = config.screen_adjustment.text_horizontal_offset;
+        document.getElementById('min_d').value = config.screen_adjustment.minute_diameter;
+        // Load other default values into their respective input elements
+    </script>
+    <script>
+        const logoWidthInput = document.getElementById('logoWidth');
+        const logoHeightInput = document.getElementById('logoHeight');
+        const txt_vborderInput = document.getElementById('txt_vborder');
+        const txt_hborderInput = document.getElementById('txt_hborder');
+        const txt_voffsetInput = document.getElementById('txt_voffset');
+        const txt_hoffsetInput = document.getElementById('txt_hoffset');
+        const min_dInput = document.getElementById('min_d');
+        // Get references to other inputs in a similar way
+    
+        logoWidthInput.addEventListener('input', updateScreen);
+        logoHeightInput.addEventListener('input', updateScreen);
+        txt_vborderInput.addEventListener('input', updateScreen);
+        txt_hborderInput.addEventListener('input', updateScreen);
+        txt_voffsetInput.addEventListener('input', updateScreen);
+        txt_hoffsetInput.addEventListener('input', updateScreen);
+        min_dInput.addEventListener('input', updateScreen);
+        // Add event listeners for other inputs
+    
+        function incrementValue(inputId, increment) {
+            const inputElement = document.getElementById(inputId);
+            const currentValue = parseInt(inputElement.value);
+            inputElement.value = currentValue + increment;
+            updateScreen();
+        }
+    
+        function updateScreen() {
+            const logoWidthValue = parseInt(document.getElementById('logoWidth').value);
+            const logoHeightValue = parseInt(document.getElementById('logoHeight').value);
+            const txt_vborderValue = parseInt(document.getElementById('txt_vborder').value);
+            const txt_hborderValue = parseInt(document.getElementById('txt_hborder').value);
+            const txt_voffsetValue = parseInt(document.getElementById('txt_voffset').value);
+            const txt_hoffsetValue = parseInt(document.getElementById('txt_hoffset').value);
+            const min_dValue = parseInt(document.getElementById('min_d').value);
+            // Get other variable values in a similar way
+    
+            const data = new URLSearchParams();
+            data.append('logo_width', logoWidthValue);
+            data.append('logo_height', logoHeightValue);
+            data.append('txt_vborder', txt_vborderValue);
+            data.append('txt_hborder', txt_hborderValue);
+            data.append('txt_voffset', txt_voffsetValue);
+            data.append('txt_hoffset', txt_hoffsetValue);
+            data.append('min_d', min_dValue);
+            // Append other variables to the data
+    
+            fetch('/adjust_screen', {
+                method: 'POST',
+                body: data
+            });
+        }
+    </script>
+    
+    
+</body>
+</html>
