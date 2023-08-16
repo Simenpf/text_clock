@@ -122,26 +122,22 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
-@app.route('/color_settings', methods =["GET", "POST"])
+@app.route('/color_settings')
 def color_settings():
+    return render_template("color_settings.html")
+
+@app.route('/adjust_color', methods=['POST'])
+def adjust_color():
+    global logo_color
     global letters_color
     global minutes_color
-    global logo_color
-    if request.method == "POST":
-        # Set letters color
-        app_request_letters_color = str(request.form.get("letters_color"))
-        letters_color = colors.Color(app_request_letters_color).bgr
+    logo_color = colors.Color(str(request.form['logoColor'])).bgr  # Retrieve color value from request
+    letters_color = colors.Color(str(request.form['lettersColor'])).bgr  # Retrieve color value from request
+    minutes_color = colors.Color(str(request.form['minutesColor'])).bgr  # Retrieve color value from request
 
-        # Set minutes color
-        app_request_minutes_color = str(request.form.get("minutes_color"))
-        minutes_color = colors.Color(app_request_minutes_color).bgr
+    # Process the color value and perform necessary actions in your Python script
+    return ''  # Return a response to the client
 
-        # Set logo color
-        app_request_logo_color = str(request.form.get("logo_color"))
-        logo_color = colors.Color(app_request_logo_color).bgr
-
-        return render_template("color_settings.html")
-    return render_template("color_settings.html")
 
 @app.route('/screen_adjustment')
 def screen_adjustment():
