@@ -90,7 +90,7 @@ def display_time():
         clock.write_time(set_letter, set_minute)
         set_logo()
         masked_canvas = cv2.bitwise_and(canvas, canvas_mask)
-        masked_canvas = shift_for_offset(masked_canvas, config["screen_adjustment"]["text_vertical_offset"], config["screen_adjustment"]["text_horizontal_offset"])
+        masked_canvas = shift_for_offset(masked_canvas, config["screen_adjustment"]["text_horizontal_offset"], config["screen_adjustment"]["text_vertical_offset"])
         cv2.imshow("window",masked_canvas)
         key = cv2.waitKey(200)
         if key & 0xFF == 27:
