@@ -12,54 +12,62 @@
             height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
+            font-family: 'Helvetica Neue', sans-serif;
         }
 
         .adjustment-container {
             text-align: center;
             margin-bottom: 20px;
+            margin-left: 50px;
+            margin-right: 50px;
         }
 
         .adjustment-label {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
+            font-size: 30px;
+            margin-bottom: 15px;
         }
 
         .color-picker {
             width: 100px;
-            height: 40px;
+            height: 100px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="adjustment-container">
-            <div class="adjustment-label">Logo Color</div>
-            <input type="color" class="color-picker" id="logoColor" value="#ff0000" oninput="updateColor()">
-        </div>
 
-        <div class="adjustment-container">
-            <div class="adjustment-label">Text Color</div>
-            <input type="color" class="color-picker" id="lettersColor" value="#000000" oninput="updateColor()">
-        </div>
-
-        <div class="adjustment-container">
-            <div class="adjustment-label">Minute Color</div>
-            <input type="color" class="color-picker" id="minutesColor" value="#000000" oninput="updateColor()">
-        </div>
+    <div class="adjustment-container">
+        <div class="adjustment-label">Logo Color</div>
+        <input type="color" class="color-picker" id="logo_color" value="#ff0000" oninput="updateColor()">
     </div>
-    <!-- Add more color parameters if needed -->
+
+    <div class="adjustment-container">
+        <div class="adjustment-label">Text Color</div>
+        <input type="color" class="color-picker" id="letters_color" value="#000000" oninput="updateColor()">
+    </div>
+
+    <div class="adjustment-container">
+        <div class="adjustment-label">Minute Color</div>
+        <input type="color" class="color-picker" id="minutes_color" value="#000000" oninput="updateColor()">
+    </div>
 
     <script>
+        const config = {{ config | tojson | safe }};
+        document.getElementById('logo_color').value = config.color_settings.logo_color;
+        document.getElementById('letters_color').value = config.color_settings.letters_color;
+        document.getElementById('minutes_color').value = config.color_settings.minutes_color;
+
+        // Load other default values into their respective input elements
+    </script>
+    <script>
         function updateColor() {
-            const logoColorValue = document.getElementById("logoColor").value;
-            const lettersColorValue = document.getElementById("lettersColor").value;
-            const minutesColorValue = document.getElementById("minutesColor").value;
+            const logoColorValue = document.getElementById("logo_color").value;
+            const lettersColorValue = document.getElementById("letters_color").value;
+            const minutesColorValue = document.getElementById("minutes_color").value;
 
             const data = new URLSearchParams();
-            data.append("logoColor", logoColorValue);
-            data.append("lettersColor", lettersColorValue);
-            data.append("minutesColor", minutesColorValue);
+            data.append("logo_color", logoColorValue);
+            data.append("letters_color", lettersColorValue);
+            data.append("minutes_color", minutesColorValue);
 
             fetch('/adjust_color', {
                 method: 'POST',
