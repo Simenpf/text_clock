@@ -89,6 +89,7 @@ def set_pixel(x,y,color):
 
 def show_pixels():
     global canvas
+    canvas = shift_for_offset(canvas, config["screen_adjustment"]["text_horizontal_offset"], config["screen_adjustment"]["text_vertical_offset"])
     cv2.imshow("window",canvas)
 
 
