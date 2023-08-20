@@ -9,9 +9,12 @@ from flask import Flask, request, render_template
 import clock
 import colors
 import screen
+import snake_game
 
 # Definitions
 white = colors.get_standard_color("white")
+showClock = True
+showSnake = False
 
 def load_config():
     global config_file_path
@@ -72,9 +75,28 @@ def update_canvas():
     for pos in minute_positions:
         canvas = cv2.rectangle(canvas, pos[0], pos[1], minutes_color, -1)
 
+
+def clear_pixels():
+    global canvas
+    for x in range(11):
+        for y in range(10):
+            canvas = cv2.rectangle(canvas, letter_positions[x][y][0], letter_positions[x][y][1], colors.get_standard_color("black").bgr, -1)
+
+
+def set_pixel(x,y,color):
+    global canvas
+    canvas = cv2.rectangle(canvas, letter_positions[x][y][0], letter_positions[x][y][1], color.bgr, -1)
+
+def show_pixels():
+    global canvas
+    cv2.imshow("window",canvas)
+
+
 def display_time():
     global canvas
     global canvas_mask
+    global showClock
+    global showSnake
     blank_image = np.zeros((screen_resolution.height,screen_resolution.width,3), np.uint8)
     canvas      = blank_image.copy()
     canvas_mask = blank_image.copy()
@@ -85,16 +107,23 @@ def display_time():
 
     # Run display loop
     while(True):
-        update_canvas()
-        canvas_mask = blank_image.copy()
-        clock.write_time(set_letter, set_minute)
-        set_logo()
-        masked_canvas = cv2.bitwise_and(canvas, canvas_mask)
-        masked_canvas = shift_for_offset(masked_canvas, config["screen_adjustment"]["text_horizontal_offset"], config["screen_adjustment"]["text_vertical_offset"])
-        cv2.imshow("window",masked_canvas)
-        key = cv2.waitKey(200)
-        if key & 0xFF == 27:
-          break
+        while(showClock):
+            update_canvas()
+            canvas_mask = blank_image.copy()
+            clock.write_time(set_letter, set_minute)
+            set_logo()
+            masked_canvas = cv2.bitwise_and(canvas, canvas_mask)
+            masked_canvas = shift_for_offset(masked_canvas, config["screen_adjustment"]["text_horizontal_offset"], config["screen_adjustment"]["text_vertical_offset"])
+            cv2.imshow("window",masked_canvas)
+            key = cv2.waitKey(200)
+            if key & 0xFF == 27:
+              break
+        if showSnake:
+            canvas = blank_image.copy()
+            snake_game.init_game(clear_pixels,set_pixel,show_pixels)
+            showClock = True
+            showSnake = False
+
 
 
 ###############
@@ -138,6 +167,25 @@ def adjust_screen():
     return ''
 
 @app.route('/fun')
+def fun():
+    return render_template('fun.html')
+
+@app.route('/snake')
+def snake():
+    global showClock 
+    global showSnake
+    showClock = False
+    showSnake = True
+    return render_template('snake.html')
+
+@app.route('/snake_update', methods=['POST'])
+def snake_update():
+    global snake_button
+    snake_game.snake_button = str(request.form['button'])
+    return ''
+
+
+
 def fun():
     return render_template('fun.html')
 

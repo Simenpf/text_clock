@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snake Game</title>
+    <style>
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            grid-gap: 10px;
+            width: 200px; /* Adjust the size of the grid as needed */
+            margin: 0 auto;
+        }
+
+        .control-button {
+            width: 80px;
+            height: 80px;
+            font-size: 18px;
+        }
+
+        /* Position the buttons for each side of the square */
+        #btnUp {
+            grid-row: 1;
+            grid-column: 2;
+        }
+
+        #btnLeft {
+            grid-row: 2;
+            grid-column: 1;
+        }
+
+        #btnRight {
+            grid-row: 2;
+            grid-column: 3;
+        }
+
+        #btnDown {
+            grid-row: 3;
+            grid-column: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="control-grid">
+        <!-- Buttons for controlling the snake -->
+        <button class="control-button" id="btnUp">↑</button>
+        <button class="control-button" id="btnLeft">←</button>
+        <button class="control-button" id="btnRight">→</button>
+        <button class="control-button" id="btnDown">↓</button>
+    </div>
+
+    <script>
+        // Function to send a request to update snake direction
+        function updateDirection(direction) {
+            const data = new URLSearchParams();
+            data.append("button", direction);
+    
+            fetch('/snake_update', {
+                method: 'POST',
+                body: data
+            });
+        }
+
+        // Add event listeners for controlling the snake
+        document.getElementById('btnUp').addEventListener('click', () => {
+            updateDirection('up');
+        });
+
+        document.getElementById('btnDown').addEventListener('click', () => {
+            updateDirection('down');
+        });
+
+        document.getElementById('btnLeft').addEventListener('click', () => {
+            updateDirection('left');
+        });
+
+        document.getElementById('btnRight').addEventListener('click', () => {
+            updateDirection('right');
+        });
+    </script>
+</body>
+</html>
